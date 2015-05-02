@@ -52,6 +52,7 @@ tar 只是一种压缩文件格式，所以，它只是把文件压缩打包而�
 
 #### 使用yum和apt-get
 直接安装包就是以上三种方式，但是并不考虑各个包之间的依赖关系.yum和apt-get适合做包管理工具
+
 1. RedHat包管理工具 yum
     * 安装软件包:yum install <package_name>
     * 删除软件包:yum remove <package_name>
