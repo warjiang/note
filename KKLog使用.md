@@ -4,7 +4,7 @@ tags: iOS,log
 ---
 1. 安装
     强烈推荐使用pod安装。(使用cocoapod，首先你得安装ruby,在用gem install cocoapod,如果gem 安装速度太慢,可以使用淘宝的ruby源)
-    `pod 'KKLog'`
+    `pod 'KKLog'`([KKLog的github地址](https://github.com/Coneboy-k/KKLog))
 2. 使用
     1. 在AppDelegate.m里面
         * 加上#import "KKLog.h"
