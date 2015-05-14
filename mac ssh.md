@@ -40,3 +40,6 @@ License:
 	License Key:	ACUYJV Q1V2QU 1YWRCN NBYCYK ADTANN 94K1WD WECKN4 Y3F249
 	Issue Date:	09-30-2013
 ```
+
+### 解决secureCRT不保存密码问题[引用自百度经验](http://jingyan.baidu.com/article/915fc414fda5fb51394b20bd.html)
+这里注意下,我给的安装包是7.3.1的,需要用后一种情况。
