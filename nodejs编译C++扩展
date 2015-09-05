@@ -1,0 +1,102 @@
+---
+title: nodejs编译C++扩展 
+tags: nodejs,addons,C++,V8
+grammar_cjkRuby: true
+---
+
+
+自从使用cordova到后来我使用ionic都离不开一个工具,就是Nodejs以及nodejs的包管理工具npm(node package management).对于node的国外仓库的问题,使用nrm,手动切换仓库基本完美解决问题.但是从2014.12开始就一直有一个问题,就是node扩展问题.很多别人写的node源码,都是需要编译过才能用.node有node-gyp这样的工具来完成在windows的编译c++,以模块的形式暴露给js接口使用.期间需要使用各种工具,尤其是windos上开发个中辛酸.
+[node-gyp github地址][1]
+
+想要node-gyp可以在windows机器上运行起来需要
+1.Python v2.7.3[pythion载地址][2]提取码：5970,这里说下千万别下载3.x.x,人官网都说了**v3.x.x is not supported**
+2.我这一步跟人官网说的不太一样,这里第二部我建议先卸载所有的关于原来安装的visual studio,记得要删干净.其次是关于Microsoft Visual C++ 2010 x64(x86) Redistribute都要删除,任何高于这个版本都要删除,包括2010本身.同时记得安装一个.NET Framework 4.0,[.NET Framework 4.0下载地址][3]
+3.前面一切准备就绪,下面就安装visual studio 2010 Express for c++ 版,建议大家安装一下,不需要破解直接用一个微软帐号注册下,基本上学生用的功能都有.Express就直接到微软官网上自己找,在线安装速度也很快.
+4.下面就准备安装Windows SDK,安装之前需要把安装Express for c++ 过程中生成的Microsoft Visual C++ 2010 x64(x86) Redistribute都删除了.此时就可以安装Windows SDK,安装的时候注意需要把vc compiler的选项勾掉,其他的按照默认选项就可以了. 下载地址我这里提供的是64位版的[Windows SDK下载地址][4],非64位版的参考这篇博文自行解决http://blog.csdn.net/mergerly/article/details/19042747
+5.之前一步把vc-compiler勾选掉,这里我们需要自行安装vc-compiler,[vc-compiler下载地址][5]
+6.这个时候执行node-gyp还是会报错,原因是windows sdk是装好了,但是没有配置环境变量.[可以参考这里的解决方案][6],我的解决过程是这样的.先打开windows sdk 7.1 cmd,然后在里面属于set>set.txt,我的set.txt文件
+```
+ALLUSERSPROFILE=C:\ProgramData
+AMDAPPSDKROOT=C:\Program Files (x86)\AMD APP\
+APPDATA=C:\Users\dwj\AppData\Roaming
+APPVER=6.1
+CL=/AI c:\Windows\Microsoft.NET\Framework64\v4.0.30319
+CLASSPATH=.;C:\Program Files\Java\jdk1.7.0_79\lib\dt.jar;C:\Program Files\Java\jdk1.7.0_79\lib\tools.jar;
+CommandPromptType=Native
+CommonProgramFiles=C:\Program Files\Common Files
+CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+CommonProgramW6432=C:\Program Files\Common Files
+COMPUTERNAME=DWJ-PC
+ComSpec=C:\Windows\system32\cmd.exe
+Configuration=Debug
+CURRENT_CPU=x64
+FP_NO_HOST_CHECK=NO
+FrameworkVersion=v4.0.30319
+HOMEDRIVE=C:
+HOMEPATH=\Users\dwj
+INCLUDE=c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\INCLUDE;C:\Program Files\Microsoft SDKs\Windows\v7.1\INCLUDE;C:\Program Files\Microsoft SDKs\Windows\v7.1\INCLUDE\gl;
+JAVA_HOME=C:\Program Files\Java\jdk1.7.0_79
+LIB=c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\Lib\amd64;C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\X64;
+LIBPATH=c:\Windows\Microsoft.NET\Framework64\v4.0.30319;C:\Windows\Microsoft.NET\Framework\v4.0.30319;C:\Windows\Microsoft.NET\Framework64\v3.5;C:\Windows\Microsoft.NET\Framework\v3.5;;c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\Lib\amd64;
+LOCALAPPDATA=C:\Users\dwj\AppData\Local
+LOGONSERVER=\\DWJ-PC
+NUMBER_OF_PROCESSORS=4
+ORIGINALPATH=C:\Python27\;C:\Python27\Scripts;C:\Program Files (x86)\Common Files\NetSarang;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\Program Files (x86)\AMD APP\bin\x86_64;C:\Program Files (x86)\AMD APP\bin\x86;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\ATI Technologies\ATI.ACE\Core-Static;C:\Program Files\Java\jdk1.7.0_79\bin;C:\Program Files\Java\jdk1.7.0_79\jre\bin;C:\Program Files\nodejs\;C:\cygwin64\bin;C:\Program Files (x86)\Git\cmd;C:\Program Files\MongoDB\Server\3.0\bin;C:\xampp\php;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Users\dwj\AppData\Roaming\npm;C:\Program Files\Boot2Docker for Windows
+OS=Windows_NT
+Path=c:\Windows\Microsoft.NET\Framework64\v4.0.30319;C:\Windows\Microsoft.NET\Framework\v4.0.30319;C:\Windows\Microsoft.NET\Framework64\v3.5;C:\Windows\Microsoft.NET\Framework\v3.5;;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\Tools;;c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\Bin\amd64;c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\Bin\VCPackages;;C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\NETFX 4.0 Tools\x64;C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\x64;C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin;;C:\Python27\;C:\Python27\Scripts;C:\Program Files (x86)\Common Files\NetSarang;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\Program Files (x86)\AMD APP\bin\x86_64;C:\Program Files (x86)\AMD APP\bin\x86;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\ATI Technologies\ATI.ACE\Core-Static;C:\Program Files\Java\jdk1.7.0_79\bin;C:\Program Files\Java\jdk1.7.0_79\jre\bin;C:\Program Files\nodejs\;C:\cygwin64\bin;C:\Program Files (x86)\Git\cmd;C:\Program Files\MongoDB\Server\3.0\bin;C:\xampp\php;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Users\dwj\AppData\Roaming\npm;C:\Program Files\Boot2Docker for Windows
+PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PlatformToolset=Windows7.1SDK
+PROCESSOR_ARCHITECTURE=AMD64
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 42 Stepping 7, GenuineIntel
+PROCESSOR_LEVEL=6
+PROCESSOR_REVISION=2a07
+ProgramData=C:\ProgramData
+ProgramFiles=C:\Program Files
+ProgramFiles(x86)=C:\Program Files (x86)
+ProgramW6432=C:\Program Files
+PROMPT=$P$G
+PSModulePath=C:\Windows\system32\WindowsPowerShell\v1.0\Modules\
+PUBLIC=C:\Users\Public
+sdkdir=C:\Program Files\Microsoft SDKs\Windows\v7.1\
+SESSIONNAME=Console
+SystemDrive=C:
+SystemRoot=C:\Windows
+TARGET_CPU=x64
+TARGET_PLATFORM=WIN7
+TEMP=C:\Users\dwj\AppData\Local\Temp
+TMP=C:\Users\dwj\AppData\Local\Temp
+ToolsVersion=4.0
+USERDOMAIN=dwj-PC
+USERNAME=dwj
+USERPROFILE=C:\Users\dwj
+VBOX_MSI_INSTALL_PATH=C:\Program Files\Oracle\VirtualBox\
+VS100COMNTOOLS=c:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\Tools\
+VS140COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\
+windir=C:\Windows
+WindowsSDKDir=C:\Program Files\Microsoft SDKs\Windows\v7.1\
+WindowsSDKVersionOverride=v7.1
+windows_tracing_flags=3
+windows_tracing_logfile=C:\BVTBin\Tests\installpackage\csilogfile.log
+
+```
+![enter description here][7]比如我的set.txt里面的PlatformToolset的值为Windows7.1SDK,则按照键值对的形式配置即可.把里面关于IBPATH, LIB, PlatformToolset, WindowsSDKDir, sdkdir, TARGET_PLATFORM相关内容都以键值的形式配置到系统的环境变量.
+7.配置好了,咱们需要测试一波.可以按照joyent公司提供的node addons的方式来测试一下,地址为https://github.com/joyent/node/tree/master/test/addons/hello-world.几个文件建立好了,就执行
+```
+node-gyp configure
+node-gyp build
+到这里没有错误就属于编译成功
+执行
+node test.js
+如果看到binding.hello()=world就说明你配置c++编译为node模块成功了
+```
+附:
+安装node-inspector的过程中,当前我这个版本的npm安装的node-inspector会在下载安装过程中报错.错误大概就是v110没有安装,其实就是人家node-inspector是在vs 2012下面编写的,如果你想编译通过,就必须安装vs2012.最后实在不能忍,把vs2012和vs2013的express版都安装上了.再执行npm instrall node-inspector就没问题了.
+进一步深入nodejs的编译c++为二进制文件,暴露接口供nodejs调用可以参考nodejs维护者joyent公司的介绍https://nodejs.org/api/addons.html
+
+  [1]: https://github.com/TooTallNate/node-gyp
+  [2]: http://yunpan.cn/ccRpH2A2CCTQz
+  [3]: http://pan.baidu.com/s/1mg3TsYO
+  [4]: http://pan.baidu.com/s/1kTMmnn5
+  [5]: http://pan.baidu.com/s/1Atv8E
+  [6]: https://github.com/TooTallNate/node-gyp/wiki/Visual-Studio-2010-Setup
+  [7]: http://localhost/xsj/windowsSDNK.png
