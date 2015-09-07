@@ -1,0 +1,35 @@
+---
+title: github 绑定SSH key 
+tags: github,ssh key
+grammar_cjkRuby: true
+---
+github使用SSH key的方式验证,之前添加过了SSH key,后来忘了,强行坑了自己一波,这里记录下.参考页面[github Generating SSH keys][1]
+默认情况下linux下面~是表示用户自己的根目录,就有点类似于/home/jiang这种样子,对应到windows下面就是C:\Users\Dell这里jiang和Dell都是用户名.推荐先安装[msysgit][2],安装好之后,直接右击选择git bash.
+```
+cd ~
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+Enter file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
+Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+Your identification has been saved in /Users/you/.ssh/id_rsa.
+# Your public key has been saved in /Users/you/.ssh/id_rsa.pub.
+# The key fingerprint is:
+# 01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+```
+这里我是直接三个回车直接跳过
+到这步结束的话,已经生成了SSH key.下面首先本地添加SSH key,然后把key.pub拷贝到github上就可以了.首先启动ssh-agent如果在一个git bash里面,就直接执行```ssh-agent -s```如果在不同的git bash里面操作的话,就需要执行```eval $(ssh-agent -s)```,执行完之后可以在任务管理器里面看到多了一个ssh-agent.exe的进程.此时继续在git bash里面执行ssh-add ~/.ssh/id_rsa(如果在前面没有指定生成的rsa的文件名,这里默认就是id_rsa,否则就换成你的rsa文件)
+本地执行完ssh-add之后,可以ssh-add -l看下刚才的rsa文件有没有添加好.
+下面需要吧id_rsa.pub文件复制到github上面.```clip < ~/.ssh/id_rsa.pub```
+在github.com/yourname->setting->SSH keys->Add SSH key->随便输入一个title,粘贴刚才clip命令拷贝的id_rsa.pub的内容.
+测试github ssh链接
+```
+ssh -T git@github.com
+The authenticity of host 'github.com (207.97.227.239)' can't be established.
+# RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+# Are you sure you want to continue connecting (yes/no)?
+```
+这一步一定要写yes!!!!!!!!,我当时傻逼了,一直都是这一步,每次都是直接回车.
+
+
+  [1]: https://help.github.com/articles/generating-ssh-keys/
+  [2]: https://git-for-windows.github.io/
